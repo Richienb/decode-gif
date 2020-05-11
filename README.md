@@ -1,41 +1,67 @@
-# the-module [![Travis CI Build Status](https://img.shields.io/travis/com/Richienb/the-module/master.svg?style=for-the-badge)](https://travis-ci.com/Richienb/the-module)
+# decode-gif [![Travis CI Build Status](https://img.shields.io/travis/com/Richienb/decode-gif/master.svg?style=for-the-badge)](https://travis-ci.com/Richienb/decode-gif)
 
-My awesome module.
+Decode the frames of a gif.
 
-[![NPM Badge](https://nodei.co/npm/the-module.png)](https://npmjs.com/package/the-module)
+[![NPM Badge](https://nodei.co/npm/decode-gif.png)](https://npmjs.com/package/decode-gif)
 
 ## Install
 
 ```sh
-npm install the-module
+npm install decode-gif
 ```
 
 ## Usage
 
 ```js
-const theModule = require("the-module");
+const fs = require("fs");
+const decodeGif = require("decode-gif");
 
-theModule("unicorns");
-//=> 'unicorns & rainbows'
+decodeGif(fs.readFileSync("unicorn.gif"));
+/*
+{
+  width: 220,
+  height: 165,
+  frames: [
+    { timeCode: 0, data: [Uint8ClampedArray] },
+	{ timeCode: 10, data: [Uint8ClampedArray] },
+	...
+  ]
+}
+*/
 ```
 
 ## API
 
-### theModule(input, options?)
+### decodeGif(data)
 
-#### input
+#### data
 
-Type: `string`
+Type: `array-like`
 
-Lorem ipsum.
+The gif data. Can be anything array-like such as a `Buffer`, `Array` or `Uint8Array`.
 
-#### options
+#### Return value
 
-Type: `object`
+##### width
 
-##### postfix
+Type: `number`
 
-Type: `string`\
-Default: `rainbows`
+The width of the gif.
 
-Lorem ipsum.
+##### height
+
+Type: `number`
+
+The height of the gif.
+
+##### frames
+
+An array of each frame of the gif.
+
+##### frame.timeCode
+
+The time code in milliseconds that the frame appears at.
+
+##### frame.data
+
+The frame data as a `Uint8ClampedArray`.

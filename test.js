@@ -1,13 +1,8 @@
 const test = require("ava")
-const theModule = require(".")
+const fs = require("fs")
+const decodeGif = require(".")
 
 test("main", t => {
-	t.throws(() => {
-		theModule(123)
-	}, {
-		instanceOf: TypeError,
-		message: "Expected a string, got number"
-	})
-
-	t.is(theModule("unicorns"), "unicorns & rainbows")
+	t.snapshot(decodeGif(fs.readFileSync("fixtures/unicorn.gif")))
+	t.snapshot(decodeGif(fs.readFileSync("fixtures/still-unicorn.gif")))
 })

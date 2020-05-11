@@ -1,8 +1,8 @@
 {
-	"name": "the-module",
+	"name": "decode-gif",
 	"version": "0.0.0",
-	"description": "My awesome module.",
-	"repository": "https://github.com/Richienb/the-module.git",
+	"description": "Decode the frames of a gif.",
+	"repository": "https://github.com/Richienb/decode-gif.git",
 	"author": "Richie Bendall <richiebendall@gmail.com>",
 	"license": "MIT",
 	"main": "index.js",
@@ -17,8 +17,16 @@
 		"lint": "xo",
 		"test": "xo && ava"
 	},
-	"keywords": [],
-	"dependencies": {},
+	"keywords": [
+		"gif",
+		"decode",
+		"array",
+		"items"
+	],
+	"dependencies": {
+		"array-range": "^1.0.1",
+		"omggif": "^1.0.10"
+	},
 	"devDependencies": {
 		"ava": "^3.8.1",
 		"eslint-config-richienb": "^0.4.2",
