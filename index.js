@@ -18,7 +18,7 @@ module.exports = data => {
 			data: frameData
 		}
 
-		currentTimeCode += delay
+		currentTimeCode += delay * 10
 
 		return data
 	})
