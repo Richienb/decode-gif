@@ -1,8 +1,8 @@
 const test = require("ava")
-const fs = require("fs")
+const { promises: fs } = require("fs")
 const decodeGif = require(".")
 
-test("main", t => {
-	t.snapshot(decodeGif(fs.readFileSync("fixtures/unicorn.gif")))
-	t.snapshot(decodeGif(fs.readFileSync("fixtures/still-unicorn.gif")))
+test("main", async t => {
+	t.snapshot(decodeGif(await fs.readFile("fixtures/unicorn.gif")))
+	t.snapshot(decodeGif(await fs.readFile("fixtures/still-unicorn.gif")))
 })
