@@ -1,6 +1,6 @@
 {
 	"name": "decode-gif",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Decode the frames of a gif.",
 	"repository": "https://github.com/Richienb/decode-gif.git",
 	"author": "Richie Bendall <richiebendall@gmail.com>",
