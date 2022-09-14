@@ -1,31 +1,90 @@
 "use strict"
 
 const { GifReader } = require("omggif")
-const arrayRange = require("array-range")
+// const ndarray = require("ndarray")
+
+const TAG = "decodeGIF"
 
 module.exports = data => {
-	const reader = new GifReader(data)
+  const reader = new GifReader(data)
 
-	let currentTimeCode = 0
-	const frames = arrayRange(0, reader.numFrames()).map(frameIndex => {
-		const { delay } = reader.frameInfo(frameIndex)
+  let currentTimeCode = 0
+  let frames = []
+  let lastUnspecifiedFrame = null
 
-		const frameData = new Uint8ClampedArray(reader.width * reader.height * 4)
-		reader.decodeAndBlitFrameRGBA(frameIndex, frameData)
+  console.log(TAG, "reader.numFrames()", reader.numFrames())
 
-		const data = {
-			timeCode: currentTimeCode,
-			data: frameData
-		}
+  for (let frameIndex = 0; frameIndex < reader.numFrames(); frameIndex++) {
+    const { delay, disposal } = reader.frameInfo(frameIndex)
 
-		currentTimeCode += delay * 10
+    const frameData = new Uint8ClampedArray(reader.width * reader.height * 4)
+    reader.decodeAndBlitFrameRGBA(frameIndex, frameData)
 
-		return data
-	})
+    console.log(TAG, "disposal = ", disposal)
 
-	return {
-		width: reader.width,
-		height: reader.height,
-		frames
-	}
+    switch (disposal) {
+      case 1: // (Do Not Dispose) 未被当前帧覆盖的前一帧像素将继续显示
+        if (frameIndex > 0) {
+          const prevFrameData = frames[frameIndex - 1].data
+          for (let i = 0; i < frameData.length; i += 4) {
+            if (frameData[i + 3] === 0) {
+              frameData[i] = prevFrameData[i]
+              frameData[i + 1] = prevFrameData[i + 1]
+              frameData[i + 2] = prevFrameData[i + 2]
+              frameData[i + 3] = prevFrameData[i + 3]
+            }
+          }
+        }
+        lastUnspecifiedFrame = frameData
+        break;
+      case 2: // (Restore to Background) 绘制当前帧之前，会先把前一帧的绘制区域恢复成背景色
+        if (frameIndex > 0 && reader.background) {
+          console.log(TAG, "background = ", reader.background)
+          // const prevFrameData = frames[frameIndex - 1].data
+          for (let i = 0; i < frameData.length; i += 4) {
+            if (frameData[i + 3] === 0) {
+              // const fixFrame = prevFrameData[i+3] === 0 ? reader.background : prevFrameData
+              frameData[i] = reader.background[i]
+              frameData[i + 1] = reader.background[i + 1]
+              frameData[i + 2] = reader.background[i + 2]
+              frameData[i + 3] = 1
+            }
+          }
+        }
+        break;
+      case 3: // (Restore to Previous) 绘制当前帧时，会先恢复到最近一个设置为Unspecified或Do not Dispose的帧，然后再将当前帧叠加到上面
+        if (lastUnspecifiedFrame) {
+          for (let i = 0; i < frameData.length; i += 4) {
+            if (frameData[i + 3] === 0) {
+              frameData[i] = lastUnspecifiedFrame[i]
+              frameData[i + 1] = lastUnspecifiedFrame[i + 1]
+              frameData[i + 2] = lastUnspecifiedFrame[i + 2]
+              frameData[i + 3] = lastUnspecifiedFrame[i + 3]
+            }
+          }
+        }
+        break;
+      default: // (Unspecified) : 绘制一个完整大小的、不透明的GIF帧来替换上一帧
+        lastUnspecifiedFrame = frameData
+        break;
+    }
+
+    // console.log(TAG, frameData)
+
+    const data = {
+      timeCode: currentTimeCode,
+      data: frameData,
+    }
+
+    currentTimeCode += delay * 10
+
+    frames.push(data)
+  }
+
+
+  return {
+    width: reader.width,
+    height: reader.height,
+    frames,
+  }
 }
