@@ -27,7 +27,7 @@ module.exports = data => {
         if (frameIndex > 0) {
           const prevFrameData = frames[frameIndex - 1].data
           for (let i = 0; i < frameData.length; i += 4) {
-            if (frameData[i] === 0 && frameData[i + 1] === 0 && frameData[i + 2] === 0) {
+            if (frameData[i + 3] === 0) {
               frameData[i] = prevFrameData[i]
               frameData[i + 1] = prevFrameData[i + 1]
               frameData[i + 2] = prevFrameData[i + 2]
@@ -38,12 +38,24 @@ module.exports = data => {
         lastUnspecifiedFrame = frameData
         break;
       case 2: // (Restore to Background) 绘制当前帧之前，会先把前一帧的绘制区域恢复成背景色
-        // TODO omggif没有输出background值
+        if (frameIndex > 0 && reader.background) {
+          console.log(TAG, "background = ", reader.background)
+          // const prevFrameData = frames[frameIndex - 1].data
+          for (let i = 0; i < frameData.length; i += 4) {
+            if (frameData[i + 3] === 0) {
+              // const fixFrame = prevFrameData[i+3] === 0 ? reader.background : prevFrameData
+              frameData[i] = reader.background[i]
+              frameData[i + 1] = reader.background[i + 1]
+              frameData[i + 2] = reader.background[i + 2]
+              frameData[i + 3] = 1
+            }
+          }
+        }
         break;
       case 3: // (Restore to Previous) 绘制当前帧时，会先恢复到最近一个设置为Unspecified或Do not Dispose的帧，然后再将当前帧叠加到上面
         if (lastUnspecifiedFrame) {
           for (let i = 0; i < frameData.length; i += 4) {
-            if (frameData[i] === 0 && frameData[i + 1] === 0 && frameData[i + 2] === 0) {
+            if (frameData[i + 3] === 0) {
               frameData[i] = lastUnspecifiedFrame[i]
               frameData[i + 1] = lastUnspecifiedFrame[i + 1]
               frameData[i + 2] = lastUnspecifiedFrame[i + 2]
